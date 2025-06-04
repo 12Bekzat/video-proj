@@ -1,0 +1,74 @@
+// frontend (Vue 3 + PrimeVue) // Файл: FaceCapture.vue
+<template>
+  <div class="p-4 space-y-4" style="display: flex; flex-wrap: wrap; gap: 12px">
+    <h2 class="text-xl font-bold" style="width: 100%">📷 Распознавание лиц</h2>
+    <video
+      ref="video"
+      autoplay
+      playsinline
+      style="width: 60%; border-radius: 15px"
+    ></video>
+    <DataTable v-if="allNames?.length" :value="users.filter(user => allNames.includes(user.username))">
+      <Column field="fullName" header="Танылған"> </Column>
+      <Column field="username" header="Танылған"> </Column>
+      <Column field="role" header="Танылған"> </Column>
+    </DataTable>
+    <span v-else>Ешкім танылған жоқ</span>
+  </div>
+</template>
+
+<script setup>
+import { computed, onMounted, ref } from "vue";
+import axios from "axios";
+import { Button, Column, DataTable } from "primevue";
+import { useMainStore } from "@/stores/useMainStore";
+import { useQueries } from "@/composables/useQueries";
+
+const video = ref(null);
+const status = ref({});
+
+const { users } = useMainStore();
+const {} = useQueries();
+
+const allNames = computed(() => {
+  const names = status.value?.names;
+  console.log(status.value);
+  console.log(names);
+  
+  if (!names) return [];
+  return names.filter((name) => name !== "Неизвестен");
+});
+
+onMounted(() => {
+  navigator.mediaDevices
+    .getUserMedia({ video: true })
+    .then((stream) => {
+      video.value.srcObject = stream;
+
+      setInterval(async () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.value.videoWidth;
+        canvas.height = video.value.videoHeight;
+        canvas.getContext("2d").drawImage(video.value, 0, 0);
+        const imageData = canvas.toDataURL("image/jpeg");
+
+        const res = await axios.post("http://localhost:8000/api/recognize", {
+          image: imageData,
+        });
+
+        if (!res.data) return;
+
+        status.value = res.data;
+      }, 3000);
+    })
+    .catch((err) => {
+      status.value = "Ошибка доступа к камере: " + err;
+    });
+});
+</script>
+
+<style scoped>
+video {
+  border: 2px solid #ddd;
+}
+</style>
