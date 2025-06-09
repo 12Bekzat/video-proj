@@ -2,14 +2,26 @@
   <DataTable :value="people" style="width: 100%; margin-bottom: 100px">
     <template #header>
       <div class="div">
-        <Button label="Пайдаланушы жасау" @click="visible = true"/>
+        <Button label="Пайдаланушы жасау" @click="visible = true" />
       </div>
     </template>
     <Column field="fullName" header="ТАӘ"> </Column>
     <Column field="username" header="Пайдаланушы аты"> </Column>
     <Column field="Manage" header="Әрекеттер" style="width: fit-content">
       <template #body="{ data }">
-        <Button icon="pi pi-trash" severity="danger" aria-label="Save" @click="remove(data?.id)"/>
+        <span style="display: flex; gap: 8px;">
+          <Button
+          icon="pi pi-trash"
+          severity="danger"
+          aria-label="Save"
+          @click="remove(data?.id)"
+          />
+          <Button
+          icon="pi pi-image"
+          aria-label="Save"
+          @click="showImage(data?.username)"
+          />
+        </span>
       </template>
     </Column>
     <template #empty> Пайдаланушылар жоқ </template>
@@ -34,6 +46,9 @@
           :invalid="invalid"
         />
         <label for="fullName">ТАӘ</label>
+      </FloatLabel>
+      <FloatLabel style="width: 100%">
+        <SelectButton v-model="item.gender" :options="options" />
       </FloatLabel>
       <Fieldset legend="Негізге бет қосу" style="width: 100%">
         <div class="p-4 space-y-4" style="width: 100%">
@@ -61,6 +76,10 @@
       </Fieldset>
     </div>
   </Dialog>
+  <Dialog v-model:visible="visibleImage" modal>
+    <img :src="activeImage" alt="" style="width: 400px; height: 400px" />
+  </Dialog>
+  <Map />
 </template>
 
 <script setup>
@@ -74,29 +93,36 @@ import {
   Fieldset,
   FloatLabel,
   InputText,
-  Select,
+  SelectButton,
 } from "primevue";
 import { useMainStore } from "@/stores/useMainStore";
 import { storeToRefs } from "pinia";
 import { useQueries } from "@/composables/useQueries";
-import Card from "./Card.vue";
+import Map from "./Map.vue";
 
 const name = ref("");
+const activeImage = ref("");
+const visibleImage = ref(false);
 const file = ref(null);
 const status = ref("");
 const visible = ref(false);
 const people = ref([]);
 
+
+
 const store = useMainStore();
 const { users } = storeToRefs(store);
 
-const { register, removeUser } = useQueries()
+const { register, removeUser } = useQueries();
 
 function handleFile(event) {
   file.value = event.target.files[0];
 }
 
-const item = ref({});
+const item = ref({
+  gender: 'Ер адам'
+});
+const options = ref(['Ер адам', 'Әйел']);
 
 const getPeople = async () => {
   const res = await axios.get("http://localhost:8000/api/people");
@@ -110,11 +136,17 @@ const getPeople = async () => {
   );
 };
 
-const remove = async (id) => {
-  removeUser(id)
+const showImage = (name) => {
+  if (!name) return;
+  visibleImage.value = true;
+  activeImage.value = `http://localhost:8000/api/person_photo/${name}`;
+};
 
-  await getPeople()
-}
+const remove = async (id) => {
+  removeUser(id);
+
+  await getPeople();
+};
 
 onMounted(async () => {
   await getPeople();
@@ -141,7 +173,7 @@ async function handleSubmit() {
     status.value = `✅ ${res.data.name} добавлен.`;
     name.value = "";
     file.value = null;
-    register({ ...item.value, password: 'qwe123qwe', role: 'USER' })
+    register({ ...item.value, password: "qwe123qwe", role: "USER" });
     await getPeople();
   } catch (err) {
     status.value = "Ошибка при загрузке: " + err.message;

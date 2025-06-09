@@ -86,7 +86,8 @@
                 <rect x="0" y="0" fill="url(#a)" width="100%" height="100%"></rect>
                 <rect x="0" y="0" fill="url(#b)" width="100%" height="100%"></rect>
             </svg></div>
-        <div class="card__avatar"><svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+        <div class="card__avatar">
+            <svg viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg" v-if="woman">
                 <circle cx="64" cy="64" fill="#ff8475" r="60"></circle>
                 <circle cx="64" cy="64" fill="#f85565" opacity=".4" r="48"></circle>
                 <path d="m64 14a32 32 0 0 1 32 32v41a6 6 0 0 1 -6 6h-52a6 6 0 0 1 -6-6v-41a32 32 0 0 1 32-32z"
@@ -130,17 +131,17 @@
                 <path
                     d="m65.07 78.93-.55.55a.73.73 0 0 1 -1 0l-.55-.55c-1.14-1.14-2.93-.93-4.27.47l-1.7 1.6h14l-1.66-1.6c-1.34-1.4-3.13-1.61-4.27-.47z"
                     fill="#f85565"></path>
-            </svg></div>
-        <div class="card__title">{{ fullName }}</div>
-        <div class="card__subtitle">{{ subtext }}</div>
-        <div class="card__wrapper">
-            <button class="card__btn">Button</button>
-            <button class="card__btn card__btn-solid">Button</button>
+            </svg>
+            <img :src="Man" alt="" v-else>
         </div>
+        <div class="card__title">{{ empty ? 'Ешкім табылған жоқ!' : fullName }}</div>
+        <div class="card__subtitle">{{ subtext }}</div>
     </div>
 </template>
 <script setup>
-const { fullName, subtext, empty } = defineProps({
+import Man from '@assets/man.png'
+
+const { fullName, subtext, empty, woman } = defineProps({
     fullName: {
         type: String,
         default: ''
@@ -148,6 +149,10 @@ const { fullName, subtext, empty } = defineProps({
     subtext: {
         type: String,
         default: ''
+    },
+    woman: {
+        type: Boolean,
+        default: false
     },
     empty: {
         type: Boolean,
