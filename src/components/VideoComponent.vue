@@ -2,18 +2,17 @@
 <template>
   <div class="p-4 space-y-4" style="display: flex; flex-wrap: wrap; gap: 12px">
     <h2 class="text-xl font-bold" style="width: 100%">📷 Распознавание лиц</h2>
-    <video
-      ref="video"
-      autoplay
-      playsinline
-      style="width: 60%; border-radius: 15px"
-    ></video>
-    <DataTable v-if="allNames?.length" :value="users.filter(user => allNames.includes(user.username))">
+    <video ref="video" autoplay playsinline style="width: 60%; border-radius: 15px"></video>
+    <!-- <DataTable v-if="allNames?.length" :value="users.filter(user => allNames.includes(user.username))">
       <Column field="fullName" header="Танылған"> </Column>
       <Column field="username" header="Танылған"> </Column>
       <Column field="role" header="Танылған"> </Column>
     </DataTable>
-    <span v-else>Ешкім танылған жоқ</span>
+    <span v-else>Ешкім танылған жоқ</span> -->
+    <Card v-if="allNames.length > 0" :full-name="users.filter(user => allNames.includes(user.username))[0].fullName"
+      :subtext="users.filter(user => allNames.includes(user.username))[0].username" />
+    <Card v-else empty="true"/>
+
   </div>
 </template>
 
@@ -23,18 +22,19 @@ import axios from "axios";
 import { Button, Column, DataTable } from "primevue";
 import { useMainStore } from "@/stores/useMainStore";
 import { useQueries } from "@/composables/useQueries";
+import Card from "./Card.vue";
 
 const video = ref(null);
 const status = ref({});
 
 const { users } = useMainStore();
-const {} = useQueries();
+const { } = useQueries();
 
 const allNames = computed(() => {
   const names = status.value?.names;
   console.log(status.value);
   console.log(names);
-  
+
   if (!names) return [];
   return names.filter((name) => name !== "Неизвестен");
 });

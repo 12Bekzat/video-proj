@@ -79,6 +79,7 @@ import {
 import { useMainStore } from "@/stores/useMainStore";
 import { storeToRefs } from "pinia";
 import { useQueries } from "@/composables/useQueries";
+import Card from "./Card.vue";
 
 const name = ref("");
 const file = ref(null);
